@@ -1,0 +1,25 @@
+public class Solution {
+    public double FindMedianSortedArrays(int[] nums1, int[] nums2) {
+        int m = nums1.Length;
+        int n = nums2.Length;
+        int l = (m+n+1)/2;
+        int r = (m+n+2)/2;
+        return (GetKthMin(nums1,0,nums2,0,l)+GetKthMin(nums1,0,nums2,0,r))/2.0;
+    }
+    
+    private double GetKthMin(int[]A,int astart,int[]B,int bstart,int k)
+    {
+        if(astart>A.Length-1) return B[bstart+k-1];
+        if(bstart>B.Length-1) return A[astart+k-1];
+        if(k==1) return Math.Min(A[astart],B[bstart]);
+        int aMid= Int32.MaxValue,bMid = Int32.MaxValue;
+        if(astart+k/2-1<A.Length)
+        aMid = A[astart+k/2-1];
+        if(bstart+k/2-1<B.Length)
+        bMid = B[bstart+k/2-1];
+        if(aMid<bMid)
+        return GetKthMin(A,astart+k/2,B,bstart,k-k/2);
+        else
+        return GetKthMin(A,astart,B,bstart+k/2,k-k/2);
+    }
+}
