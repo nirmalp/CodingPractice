@@ -45,17 +45,51 @@ def sim_pearson(prefs, person1, person2):
 	r=num/den
 	return r
 
-# print(sim_pearson(critics,'Lisa Rose','Gene Seymour'))
-
-#print val
-
-def top_Matches(self prefs,person,n=5,similarity=sim_pearson):
-	print(prefs[person])
-	scores=sim_pearson(perfs,person,'Lisa Rose')
+#Returns best match for a person
+def top_Matches(
+	prefs,
+	person,
+	n=5,
+	similarity=sim_pearson
+	):
+	scores = [(similarity(prefs, person, other), other) for other in prefs 
+			if other!=person]
 	#print(scores)
-	# scores=[similarity(perfs,person,other) for other in prefs]
-	# scores.sort()
-	# scores.reverse()
-	# return scores[0:n]
-	
-top_Matches(critics,'Toby',n=3)
+	scores.sort()
+	scores.reverse()
+	return scores[0:n]
+
+def getRecommendation(prefs, person, similarity=sim_pearson):
+	totals={}
+	simSums={}
+	for other in prefs:
+		if other==person:
+			continue
+		sim=similarity(prefs,person,other)
+		# ignore scores of zero or lower
+		if sim<=0:
+			continue
+		for item in prefs[other]:
+			#only scores movies that person haven't seen
+			if item not in prefs[person] or prefs[person][item]==0:
+				totals.setdefault(item,0)
+				totals[item]+=sim*prefs[other][item]
+				simSums.setdefault(item,0)
+				simSums[item]+=sim
+	rankings = [(total/simSums[item],item) for item,total in totals.items()]
+	rankings.sort()
+	rankings.reverse()
+	return rankings
+
+def transformPerfs(prefs):
+	result={}
+	for person in prefs:
+		for item in prefs[person]:
+			result.setdefault(item,{})
+			result[item][person]=prefs[person][item]
+	return result
+
+print(top_Matches(transformPerfs(critics),'Just My Luck'))
+#print(top_Matches(critics,'Lisa Rose',n=3))
+print(getRecommendation(critics,'Toby'))
+#print(sim_pearson(critics,'Toby','Claudia Puig'))
