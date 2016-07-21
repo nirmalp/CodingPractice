@@ -89,7 +89,37 @@ def transformPerfs(prefs):
 			result[item][person]=prefs[person][item]
 	return result
 
-print(top_Matches(transformPerfs(critics),'Just My Luck'))
+def calculateSimilarItems(prefs, n=10):
+	result={}
+	itemPrefs=transformPerfs(prefs)
+	c=0
+	for item in itemPrefs:
+		c+=1
+		if c%100==0: print("%d %d",c,len(itemPrefs))
+		scores= top_Matches(itemPrefs, item, n=n, similarity=sim_distance)
+		result[item]=scores
+	return result
+
+
+def getRecommendationItems(prefs, itemMatch,user):
+	userRatings=prefs[user]
+	scores={}
+	totalSim={}
+	#Loop over items rated by the user
+	for(item,rating) in userRatings.items():
+		for(similarity,item2) in itemMatch[item]:
+			if item2 in userRatings: continue
+			scores.setdefault(item2,0)
+			scores[item2]+=similarity*rating
+			totalSim.setdefault(item2,0)
+			totalSim[item2]+=similarity
+	rankings=[(score/totalSim[item],item) for item,score in scores.items()]
+	rankings.sort()
+	rankings.reverse()
+	return rankings
+#print(top_Matches(transformPerfs(critics),'Just My Luck'))
+itemsim=calculateSimilarItems(critics)
+print(getRecommendationItems(critics,itemsim,'Toby'))
 #print(top_Matches(critics,'Lisa Rose',n=3))
-print(getRecommendation(critics,'Toby'))
+#print(getRecommendation(critics,'Toby'))
 #print(sim_pearson(critics,'Toby','Claudia Puig'))
